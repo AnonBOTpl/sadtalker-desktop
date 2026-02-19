@@ -9,6 +9,10 @@ A clean, modern desktop GUI for [SadTalker](https://github.com/OpenTalker/SadTal
 
 ---
 
+<img width="815" height="754" alt="screen1" src="https://github.com/user-attachments/assets/ad450622-df20-4e05-95e6-1039ecbcf098" />
+
+---
+
 ## ✨ Features
 
 - **One-click installer** — installs Git, Python 3.9, uv, PyTorch (CUDA auto-select), all dependencies, and creates a desktop shortcut
