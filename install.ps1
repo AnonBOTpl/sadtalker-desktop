@@ -219,10 +219,33 @@ function Install-PyTorch ($venvPy) {
 function Install-Packages ($venvPy) {
     STEP "Installing Python dependencies..."
 
+    # cmake must be installed and on PATH before dlib
+    INFO "Installing cmake..."
+    & uv pip install --python "$venvPy" cmake 2>&1 | Out-Null
+    # Also ensure cmake binary is accessible by adding venv Scripts to PATH
+    $venvScripts = Split-Path $venvPy
+    $env:PATH = "$venvScripts;$env:PATH"
+    OK "cmake ready."
+
+    INFO "Installing dlib (compiles from source, may take 3-5 minutes)..."
+    & uv pip install --python "$venvPy" dlib
+    if ($LASTEXITCODE -ne 0) {
+        WARN "dlib compilation failed. Trying pre-built wheel..."
+        # Try pre-built wheel for Python 3.9 Windows
+        $dlibWheel = "https://github.com/z-mahmud22/Dlib_Windows_Python3.x/releases/download/v19.24.2/dlib-19.24.2-cp39-cp39-win_amd64.whl"
+        & uv pip install --python "$venvPy" $dlibWheel
+        if ($LASTEXITCODE -ne 0) {
+            ERR "dlib installation failed! Face detection will not work."
+            WARN "You can try installing dlib manually later from the Setup tab in the app."
+        } else {
+            OK "dlib installed (pre-built wheel)."
+        }
+    } else {
+        OK "dlib installed (compiled from source)."
+    }
+
     $packages = @(
         @{ pkg = "setuptools<70";  label = "setuptools (pkg_resources fix)" },
-        @{ pkg = "cmake";          label = "cmake (required by dlib)" },
-        @{ pkg = "dlib";           label = "dlib (face detection)" },
         @{ pkg = "librosa==0.9.2"; label = "librosa 0.9.2 (audio)" },
         @{ pkg = "gfpgan";         label = "gfpgan (face enhancer)" },
         @{ pkg = "basicsr";        label = "basicsr" },
